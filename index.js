@@ -37,7 +37,7 @@ app.get('/posts/:id', postController.getOne);
 app.get('/posts', postController.getAll);
 app.post('/posts', checkAuth, postCreateValidation, postController.create);
 app.delete('/posts/:id', checkAuth, postController.remove);
-app.patch('/posts/:id', postController.update);
+app.patch('/posts/:id', checkAuth, postController.update);
 
 app.listen(3000, () => {
   console.log('Server has been started on 3000 port!');

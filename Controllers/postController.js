@@ -123,7 +123,14 @@ export const update = async (req, res) => {
         user: req.userId,
       },
     );
-  } catch (error) {
 
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Не удалось обновить статью',
+    });
   }
 };

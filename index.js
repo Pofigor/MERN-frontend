@@ -1,15 +1,14 @@
 import express from 'express';
-
 import morgan from 'morgan';
+import multer from 'multer';
 
 import mongoose from 'mongoose';
 
 import { loginValidation, registerValidation, postCreateValidation } from './validations.js';
 
-import checkAuth from './utilities/checkAuth.js';
+import { checkAuth, handleValidationErrors } from './utilities/index.js';
 
-import * as userController from './Controllers/userController.js';
-import * as postController from './Controllers/postController.js';
+import { userController, postController } from './Controllers/index.js';
 
 mongoose
   .connect('mongodb+srv://admin:123@cluster0.tchem0o.mongodb.net/blog?retryWrites=true&w=majority')
@@ -18,26 +17,41 @@ mongoose
 
 const app = express();
 
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => {
+    cb(null, 'uploads');
+  },
+  filename: (_, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+app.use('/uploads', express.static('uploads'));
 
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
-// LOG IN
-app.post('/auth/login', loginValidation, userController.login);
-// REGISTRATION
-app.post('/auth/register', registerValidation, userController.register);
-// getMe
+
+app.post('/auth/login', loginValidation, handleValidationErrors, userController.login);
+app.post('/auth/register', registerValidation, handleValidationErrors, userController.register);
 app.get('/auth/me', checkAuth, userController.getMe);
 
-// СОЗДАНИЕ ПОСТА
+app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+  res.json({
+    url: `/uploads/${req.file.originalname}`,
+  });
+});
+
 app.get('/posts/:id', postController.getOne);
 app.get('/posts', postController.getAll);
-app.post('/posts', checkAuth, postCreateValidation, postController.create);
+app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, postController.create);
 app.delete('/posts/:id', checkAuth, postController.remove);
-app.patch('/posts/:id', checkAuth, postController.update);
+app.patch('/posts/:id', checkAuth, postCreateValidation, handleValidationErrors, postController.update);
 
 app.listen(3000, () => {
   console.log('Server has been started on 3000 port!');

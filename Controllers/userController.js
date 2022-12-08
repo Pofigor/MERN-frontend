@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { validationResult } from 'express-validator';
-import UserModel from '../db/models/user.js';
+import UserModel from '../db/models/User.js';
 
 export const register = async (req, res) => {
   try {
-    const errors = validationResult(req);
+    const errors = validationResult(req); // на гите этого нет
     if (!errors.isEmpty()) {
       return res.status(400).json(errors.array());
     }
@@ -54,7 +54,7 @@ export const login = async (req, res) => {
     // проверяем пользователя
     if (!user) {
       return res.status(404).json({ // 404 - Not found
-        message: 'Неверный логин, или пароль',
+        message: 'Пользователь не найден',
       });
     }
 
@@ -103,7 +103,7 @@ export const getMe = async (req, res) => {
 
     const { passwordHash, ...userData } = user._doc;
 
-    res.json({ userData });
+    res.json(userData);
   } catch (error) {
     console.log('ERROR AUTH/ME', error);
     res.status(500).json({

@@ -4,9 +4,12 @@ import morgan from 'morgan';
 
 import mongoose from 'mongoose';
 
-import { registerValidation } from './validations/auth.js';
+import { loginValidation, registerValidation, postCreateValidation } from './validations.js';
 
 import checkAuth from './utilities/checkAuth.js';
+
+import * as userController from './Controllers/userController.js';
+import * as postController from './Controllers/postController.js';
 
 mongoose
   .connect('mongodb+srv://admin:123@cluster0.tchem0o.mongodb.net/blog?retryWrites=true&w=majority')
@@ -23,31 +26,18 @@ app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 // LOG IN
-app.post('/auth/login');
-
+app.post('/auth/login', loginValidation, userController.login);
 // REGISTRATION
-app.post('/auth/register', registerValidation);
+app.post('/auth/register', registerValidation, userController.register);
+// getMe
+app.get('/auth/me', checkAuth, userController.getMe);
 
-app.get('/auth/me', checkAuth, async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.userId);
-
-    if (!user) {
-      return res.status(404).json({
-        message: 'Пользователь не найден',
-      });
-    }
-
-    const { passwordHash, ...userData } = user._doc;
-
-    res.json({ userData });
-  } catch (error) {
-    console.log('ERROR AUTH/ME', error);
-    res.status(500).json({
-      message: 'Нет доступа',
-    });
-  }
-});
+// СОЗДАНИЕ ПОСТА
+app.get('/posts/:id', postController.getOne);
+app.get('/posts', postController.getAll);
+app.post('/posts', checkAuth, postCreateValidation, postController.create);
+app.delete('/posts/:id', checkAuth, postController.remove);
+app.patch('/posts/:id', postController.update);
 
 app.listen(3000, () => {
   console.log('Server has been started on 3000 port!');

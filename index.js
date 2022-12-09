@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import multer from 'multer';
+import cors from 'cors';
 
 import mongoose from 'mongoose';
 
@@ -29,6 +30,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));

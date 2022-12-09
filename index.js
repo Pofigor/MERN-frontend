@@ -49,8 +49,12 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
   });
 });
 
+app.get('/tags', postController.getLastTags);
+
+
 app.get('/posts/:id', postController.getOne);
 app.get('/posts', postController.getAll);
+app.get('/posts/tags', postController.getLastTags);
 app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, postController.create);
 app.delete('/posts/:id', checkAuth, postController.remove);
 app.patch('/posts/:id', checkAuth, postCreateValidation, handleValidationErrors, postController.update);

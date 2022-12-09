@@ -1,13 +1,45 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 
 import { Post } from "../components/Post";
 import { Index } from "../components/AddComment";
 import { CommentsBlock } from "../components/CommentsBlock";
+import axios from "../axios";
+// import { objectTraps } from "immer/dist/internal";
 
 export const FullPost = () => {
+  const [data, setData] = React.useState();
+  const [isLoading] = React.useState(true);
+  const {id} = useParams();
+
+  React.useEffect(() => {
+    axios.get(`/posts/${id}`).then(res => {
+      setData(res.data);
+    }).catch(err => {
+      console.warn(err);
+      alert('Ошибка при получении статьи')
+    });
+  }, []);
+
+  if(isLoading) {
+    return <Post isLoading={isLoading} isFullPost/>;
+  }
+
   return (
     <>
       <Post
+        id={data._id}
+        title={data.title}
+        imageUrl="https://res.cloudinary.com/practicaldev/image/fetch/s--UnAfrEG8--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/icohm5g0axh9wjmu4oc3.png"
+        user={data.user}
+        createdAt={data.createdAt}
+        viewsCount={data.viewsCount}
+        commentsCount={3}
+        tags={data.tags}
+        isFullPost>
+        <p>{data.text}</p>
+      </Post>
+      {/* <Post
         id={1}
         title="Roast the code #1 | Rock Paper Scissors"
         imageUrl="https://res.cloudinary.com/practicaldev/image/fetch/s--UnAfrEG8--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/icohm5g0axh9wjmu4oc3.png"
@@ -29,7 +61,7 @@ export const FullPost = () => {
           so we can all learn together. Now then, head over to the repo and
           roast as hard as you can!!
         </p>
-      </Post>
+      </Post> */}
       <CommentsBlock
         items={[
           {
